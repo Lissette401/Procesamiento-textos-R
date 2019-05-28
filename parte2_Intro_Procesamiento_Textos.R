@@ -21,7 +21,7 @@
 #TIP: Recuerden que si la codificación no es correcta tienen que ir a File - Reopen with Encoding 
 #y seleccionar UTF-8
 # 1.2 Establecer el directorio de trabajo (donde estén tus datos)
-setwd("C:/Users/JuanaLaCubana/Documents/taller_RLadiesSCL-CDMX")
+#setwd("C:/Users/JuanaLaCubana/Documents/taller_RLadiesSCL-CDMX")
 
 ###### PASO 2 #####
 # instalar paquetes #
@@ -33,8 +33,8 @@ setwd("C:/Users/JuanaLaCubana/Documents/taller_RLadiesSCL-CDMX")
 #install.packages("readr")
 #install.packages("ggplot2")
 
-#install.packages("tokenizers")
-#install.packages("wordcloud")
+install.packages("tokenizers")
+install.packages("wordcloud")
 
 ###### PASO 3 #####
 # cargar o llamar paquetes #
@@ -123,7 +123,7 @@ tabla <- table(palabras)
 View(tabla)
 class(tabla)
 #En la siguiente línea, vamos a convertir nuestra tabla en un data frame
-df <- data_frame(palabra = names(tabla), frecuencia = as.numeric(tabla))
+df <- tibble(palabra = names(tabla), frecuencia = as.numeric(tabla))
 class(df)
 
 #Para entender un poco mejor la diferencia entre una tabla y un dataframe corran las siguientes líneas:
@@ -161,10 +161,10 @@ objetoAMLO <- file(archivoAMLO,open="r")
 # Aplica la función readLines para leer las líneas del archivo, fíjate que el encoding sea UTF-8!
 amloprueba <- readLines(objetoAMLO, encoding = "UTF-8")
 
-
+amloprueba
 # Junta todas las oraciones en un solo texto con paste()
 amloTexto <- paste(amloprueba, collapse = "\n")
-
+amloTexto
 # Obtén las palabras del discurso
 palabrasamlo <- tokenize_words(amloTexto)
 
@@ -175,7 +175,7 @@ View(amlotabla)
 
 
 # Convierte tu tabla en un data frame
-amlodf <- data_frame(palabra = names(amlotabla), frecuencia = as.numeric(amlotabla))
+amlodf <- tibble(palabra = names(amlotabla), frecuencia = as.numeric(amlotabla))
 amlodf <- arrange(amlodf, desc(frecuencia))
 View(amlodf)
 length(amlodf$palabra)
@@ -202,11 +202,11 @@ wordcloud(words = amlodf_sinstopwords$palabra, freq = amlodf_sinstopwords$frecue
 # Paso 1. Carga los metadatos
 getwd()
 metadatos <- read_csv("metadatos_presidentes.csv")
-
+metadatos
 # Paso 2. Especifica en qué carpeta está tu corpus
 # OJO: fíjate que las diagonales estén en la dirección correcta,
 #si lo copias y pegas de Windows estarán al revés
-input_loc <- "C:/Users/JuanaLaCubana/Documents/taller_RLadiesSCL-CDMX/textos-mexico"
+input_loc <- "textos-mexico"
 
 #Paso 3. Para leer y guardar todos los .txt en la variable "texto"
 # corre el siguiente bloque de código:
@@ -254,7 +254,7 @@ longitud_oraciones <- list()
 for (i in 1:nrow(metadatos)) {
   longitud_oraciones[[i]] <- sapply(oraciones_palabras[[i]], length)
 }
-
+longitud_oraciones
 #Paso 8. Sacamos la mediana del número de palabras por oración por discurso
 
 mediana_longitud_oraciones <- sapply(longitud_oraciones, median)
@@ -267,18 +267,20 @@ mediana_longitud_oraciones <- sapply(longitud_oraciones, median)
 qplot(metadatos$año, mediana_longitud_oraciones)+
   labs(x = "Año", y = "Longitud media de las oraciones")+
   geom_smooth()
+?geom_smooth
 
 # Paso 10. Guardemos toda la información que tenemos en un espacio y creemos nubes de palabras
 # para cada discurso
 descripcion <- c()
 for (i in 1:length(palabras)) {
   tabla <- table(palabras[[i]])
-  tabla <- data_frame(palabra = names(tabla), frecuencia = as.numeric(tabla))
+  tabla <- tibble(palabra = names(tabla), frecuencia = as.numeric(tabla))
   tabla <- arrange(tabla, desc(frecuencia))
   tabla <- tabla[!(tabla$palabra %in% sw$swES),]
   #tabla <- subset(tabla, !(palabra %in% swES))
   mediana <- round(median(tabla$frecuencia))
-  resultado <- c(metadatos$presidente[i], metadatos$año[i], tabla$palabra[1:5], tabla$frecuencia[1:5], mediana)
+  resultado <- c(metadatos$presidente[i], metadatos$año[i], 
+                 tabla$palabra[1:5], tabla$frecuencia[1:5], mediana)
   descripcion <- c(descripcion, paste(resultado, collapse = "; "))
   nombre_de_imagen <- paste0(metadatos$año[i],".png")
   png(nombre_de_imagen)
@@ -289,5 +291,6 @@ for (i in 1:length(palabras)) {
   dev.off()
 }
 descripcion
+
 
 
